@@ -28,7 +28,18 @@ export function useCategories() {
       .insert({ ...cat, user_id: user.id })
       .select()
       .single()
-    if (!error) setCategories(prev => [...prev, data])
+    if (!error) setCategories(prev => [...prev, data].sort((a,b) => a.name.localeCompare(b.name)))
+    return { data, error }
+  }
+
+  async function updateCategory(id, updates) {
+    const { data, error } = await supabase
+      .from('categories')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single()
+    if (!error) setCategories(prev => prev.map(c => c.id === id ? data : c).sort((a,b) => a.name.localeCompare(b.name)))
     return { data, error }
   }
 
@@ -38,5 +49,5 @@ export function useCategories() {
     return { error }
   }
 
-  return { categories, loading, createCategory, deleteCategory, refetch: fetchCategories }
+  return { categories, loading, createCategory, updateCategory, deleteCategory, refetch: fetchCategories }
 }

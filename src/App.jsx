@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 import { useCategories } from './hooks/useCategories'
 import AuthPage from './components/Auth/AuthPage'
@@ -10,8 +10,16 @@ import SharedView from './components/Shared/SharedView'
 
 function AppInner() {
   const { user, loading } = useAuth()
-  const { categories, createCategory } = useCategories()
+  const { categories, createCategory, updateCategory, deleteCategory } = useCategories()
   const [activeView, setActiveView] = useState('calendar')
+  const [theme, setTheme] = useState(() => localStorage.getItem('lc-theme') || 'dark')
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('light', theme === 'light')
+    localStorage.setItem('lc-theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
 
   if (loading) return (
     <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -26,8 +34,12 @@ function AppInner() {
       <Sidebar
         categories={categories}
         onCategoryCreate={createCategory}
+        onCategoryUpdate={updateCategory}
+        onCategoryDelete={deleteCategory}
         activeView={activeView}
         setActiveView={setActiveView}
+        theme={theme}
+        toggleTheme={toggleTheme}
       />
       <main style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {activeView === 'calendar' && <CalendarGrid categories={categories} />}

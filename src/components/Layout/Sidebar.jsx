@@ -1,23 +1,60 @@
 import { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 
-export default function Sidebar({ categories, onCategoryCreate, activeView, setActiveView }) {
+const PRESET_ICONS = ['📌','💼','🏃','✈️','🌸','👨‍👩‍👧','❤️','🌿','🎵','📚','🍽️','🏖️','💡','🎯','🎉','🏋️','🚴','🧘','🎨','💻','🐾','⚽','🏔️','🛒','💰']
+const PRESET_COLORS = ['#6C63FF','#3B82F6','#10B981','#F59E0B','#EC4899','#EF4444','#8B5CF6','#84CC16','#06B6D4','#F97316','#14B8A6','#A855F7','#E11D48','#65A30D','#0EA5E9']
+
+export default function Sidebar({ categories, onCategoryCreate, onCategoryUpdate, onCategoryDelete, activeView, setActiveView, theme, toggleTheme }) {
   const { user, signOut } = useAuth()
-  const [newCatName, setNewCatName] = useState('')
-  const [newCatColor, setNewCatColor] = useState('#6C63FF')
-  const [newCatIcon, setNewCatIcon] = useState('📌')
+
+  // New category form
   const [showCatForm, setShowCatForm] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [newColor, setNewColor] = useState('#6C63FF')
+  const [newIcon, setNewIcon] = useState('📌')
   const [creating, setCreating] = useState(false)
 
-  const PRESET_ICONS = ['📌','💼','🏃','✈️','🌸','👨‍👩‍👧','❤️','🌿','🎵','📚','🍽️','🏖️','💡','🎯','🎉']
-  const PRESET_COLORS = ['#6C63FF','#3B82F6','#10B981','#F59E0B','#EC4899','#EF4444','#8B5CF6','#84CC16','#06B6D4','#F97316']
+  // Edit category
+  const [editingId, setEditingId] = useState(null)
+  const [editName, setEditName] = useState('')
+  const [editColor, setEditColor] = useState('')
+  const [editIcon, setEditIcon] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  function startEdit(cat) {
+    setEditingId(cat.id)
+    setEditName(cat.name)
+    setEditColor(cat.color)
+    setEditIcon(cat.icon)
+    setShowCatForm(false)
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+  }
+
+  async function handleSaveEdit(id) {
+    if (!editName.trim()) return
+    setSaving(true)
+    await onCategoryUpdate(id, { name: editName.trim(), color: editColor, icon: editIcon })
+    setSaving(false)
+    setEditingId(null)
+  }
+
+  async function handleDelete(id) {
+    if (!window.confirm('Delete this category? Events using it will keep their data.')) return
+    await onCategoryDelete(id)
+    setEditingId(null)
+  }
 
   async function handleCreateCat(e) {
     e.preventDefault()
-    if (!newCatName.trim()) return
+    if (!newName.trim()) return
     setCreating(true)
-    await onCategoryCreate({ name: newCatName.trim(), color: newCatColor, icon: newCatIcon, type: 'event' })
-    setNewCatName('')
+    await onCategoryCreate({ name: newName.trim(), color: newColor, icon: newIcon, type: 'event' })
+    setNewName('')
+    setNewIcon('📌')
+    setNewColor('#6C63FF')
     setShowCatForm(false)
     setCreating(false)
   }
@@ -31,10 +68,19 @@ export default function Sidebar({ categories, onCategoryCreate, activeView, setA
 
   return (
     <aside style={sidebar}>
-      {/* Logo */}
-      <div style={logo}>
-        <span style={{ fontSize: 22 }}>🗓</span>
-        <span style={logoText}>LifeCalendar</span>
+      {/* Logo + Theme toggle */}
+      <div style={logoRow}>
+        <div style={logo}>
+          <span style={{ fontSize: 22 }}>🗓</span>
+          <span style={logoText}>LifeCalendar</span>
+        </div>
+        <button
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          style={themeBtn}
+        >
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
       </div>
 
       {/* Nav */}
@@ -57,44 +103,94 @@ export default function Sidebar({ categories, onCategoryCreate, activeView, setA
       <div style={section}>
         <div style={sectionHeader}>
           <span style={sectionTitle}>Categories</span>
-          <button onClick={() => setShowCatForm(v => !v)} style={addBtn}>+</button>
+          <button
+            onClick={() => { setShowCatForm(v => !v); setEditingId(null) }}
+            style={addBtn}
+            title="Add category"
+          >
+            {showCatForm ? '✕' : '+'}
+          </button>
         </div>
 
+        {/* New category form */}
         {showCatForm && (
           <form onSubmit={handleCreateCat} style={catForm}>
             <input
-              value={newCatName}
-              onChange={e => setNewCatName(e.target.value)}
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
               placeholder="Category name"
               style={catInput}
               autoFocus
             />
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+            <div style={pickerLabel}>Icon</div>
+            <div style={iconGrid}>
               {PRESET_ICONS.map(ic => (
-                <button key={ic} type="button" onClick={() => setNewCatIcon(ic)}
-                  style={{ ...iconBtn, background: newCatIcon === ic ? 'var(--accent-dim)' : 'transparent' }}>
+                <button key={ic} type="button" onClick={() => setNewIcon(ic)}
+                  style={{ ...iconBtn, background: newIcon === ic ? 'var(--accent-dim)' : 'transparent', outline: newIcon === ic ? '1px solid var(--accent)' : 'none' }}>
                   {ic}
                 </button>
               ))}
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+            <div style={pickerLabel}>Color</div>
+            <div style={colorGrid}>
               {PRESET_COLORS.map(c => (
-                <button key={c} type="button" onClick={() => setNewCatColor(c)}
-                  style={{ ...colorDot, background: c, outline: newCatColor === c ? `2px solid ${c}` : 'none', outlineOffset: 2 }} />
+                <button key={c} type="button" onClick={() => setNewColor(c)}
+                  style={{ ...colorDot, background: c, outline: newColor === c ? `2px solid ${c}` : 'none', outlineOffset: 2 }} />
               ))}
             </div>
-            <button type="submit" disabled={creating} style={saveCatBtn}>
-              {creating ? '...' : 'Add'}
-            </button>
+            <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+              <button type="button" onClick={() => setShowCatForm(false)} style={cancelBtn}>Cancel</button>
+              <button type="submit" disabled={creating} style={saveCatBtn}>{creating ? '...' : 'Add'}</button>
+            </div>
           </form>
         )}
 
+        {/* Category list */}
         <div style={catList}>
           {categories.map(cat => (
-            <div key={cat.id} style={catItem}>
-              <span>{cat.icon}</span>
-              <span style={{ flex: 1, fontSize: 13 }}>{cat.name}</span>
-              <span style={{ ...catDot, background: cat.color }} />
+            <div key={cat.id}>
+              {editingId === cat.id ? (
+                /* Edit form inline */
+                <div style={catEditForm}>
+                  <input
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    style={catInput}
+                    autoFocus
+                  />
+                  <div style={pickerLabel}>Icon</div>
+                  <div style={iconGrid}>
+                    {PRESET_ICONS.map(ic => (
+                      <button key={ic} type="button" onClick={() => setEditIcon(ic)}
+                        style={{ ...iconBtn, background: editIcon === ic ? 'var(--accent-dim)' : 'transparent', outline: editIcon === ic ? '1px solid var(--accent)' : 'none' }}>
+                        {ic}
+                      </button>
+                    ))}
+                  </div>
+                  <div style={pickerLabel}>Color</div>
+                  <div style={colorGrid}>
+                    {PRESET_COLORS.map(c => (
+                      <button key={c} type="button" onClick={() => setEditColor(c)}
+                        style={{ ...colorDot, background: c, outline: editColor === c ? `2px solid ${c}` : 'none', outlineOffset: 2 }} />
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                    <button type="button" onClick={() => handleDelete(cat.id)} style={deleteBtn} title="Delete">🗑</button>
+                    <button type="button" onClick={cancelEdit} style={cancelBtn}>Cancel</button>
+                    <button type="button" onClick={() => handleSaveEdit(cat.id)} disabled={saving} style={saveCatBtn}>
+                      {saving ? '...' : 'Save'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Normal row */
+                <div style={catItem} onClick={() => startEdit(cat)} title="Click to edit">
+                  <span style={{ fontSize: 15 }}>{cat.icon}</span>
+                  <span style={{ flex: 1, fontSize: 13, color: 'var(--text-primary)' }}>{cat.name}</span>
+                  <span style={{ ...catDot, background: cat.color }} />
+                  <span style={editHint}>✏️</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -114,50 +210,62 @@ export default function Sidebar({ categories, onCategoryCreate, activeView, setA
 }
 
 const sidebar = {
-  width: 220, minWidth: 220,
+  width: 230, minWidth: 230,
   background: 'var(--bg-secondary)',
   borderRight: '1px solid var(--border)',
   display: 'flex', flexDirection: 'column',
   padding: '0 0 16px',
   overflow: 'hidden',
+  transition: 'background 0.25s ease',
 }
-const logo = {
-  display: 'flex', alignItems: 'center', gap: 8,
-  padding: '20px 16px 16px',
+const logoRow = {
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+  padding: '16px 12px 14px',
   borderBottom: '1px solid var(--border)',
 }
-const logoText = {
-  fontFamily: 'var(--font-display)',
-  fontSize: 16, fontWeight: 700,
+const logo = { display: 'flex', alignItems: 'center', gap: 8 }
+const logoText = { fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700 }
+const themeBtn = {
+  background: 'var(--bg-hover)', border: '1px solid var(--border)',
+  borderRadius: 8, width: 32, height: 32, fontSize: 16,
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0,
 }
-const nav = { display: 'flex', flexDirection: 'column', gap: 2, padding: '12px 8px' }
+const nav = { display: 'flex', flexDirection: 'column', gap: 2, padding: '10px 8px' }
 const navItem = {
   display: 'flex', alignItems: 'center', gap: 10,
   padding: '9px 10px', borderRadius: 8,
   background: 'none', color: 'var(--text-secondary)',
   fontSize: 13, fontWeight: 500, textAlign: 'left',
-  transition: 'all 0.15s',
+  transition: 'all 0.15s', cursor: 'pointer',
 }
-const navItemActive = {
-  background: 'var(--accent-dim)',
-  color: 'var(--accent)',
-  fontWeight: 600,
-}
-const divider = { height: 1, background: 'var(--border)', margin: '0 16px' }
-const section = { flex: 1, overflow: 'hidden', padding: '12px 8px', display: 'flex', flexDirection: 'column' }
+const navItemActive = { background: 'var(--accent-dim)', color: 'var(--accent)', fontWeight: 600 }
+const divider = { height: 1, background: 'var(--border)', margin: '0 12px' }
+const section = { flex: 1, overflow: 'hidden', padding: '10px 8px', display: 'flex', flexDirection: 'column', minHeight: 0 }
 const sectionHeader = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 6px', marginBottom: 6 }
 const sectionTitle = { fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }
-const addBtn = { background: 'var(--bg-hover)', color: 'var(--text-secondary)', borderRadius: 6, width: 22, height: 22, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }
+const addBtn = { background: 'var(--bg-hover)', color: 'var(--text-secondary)', borderRadius: 6, width: 22, height: 22, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '1px solid var(--border)' }
 const catForm = { background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, padding: 10, marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 4 }
+const catEditForm = { background: 'var(--bg-card)', border: '1px solid var(--accent)', borderRadius: 8, padding: 10, marginBottom: 6, display: 'flex', flexDirection: 'column', gap: 4 }
 const catInput = { background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 10px', color: 'var(--text-primary)', fontSize: 12, width: '100%' }
-const iconBtn = { background: 'none', borderRadius: 4, padding: 2, fontSize: 14, cursor: 'pointer' }
-const colorDot = { width: 14, height: 14, borderRadius: '50%', border: 'none', cursor: 'pointer' }
-const saveCatBtn = { background: 'var(--accent)', color: '#fff', borderRadius: 6, padding: '5px 12px', fontSize: 12, fontWeight: 600, marginTop: 4, alignSelf: 'flex-end' }
-const catList = { display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }
-const catItem = { display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderRadius: 6 }
+const pickerLabel = { fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 2 }
+const iconGrid = { display: 'flex', flexWrap: 'wrap', gap: 2 }
+const colorGrid = { display: 'flex', flexWrap: 'wrap', gap: 4 }
+const iconBtn = { background: 'none', borderRadius: 4, padding: 2, fontSize: 13, cursor: 'pointer', transition: 'all 0.1s' }
+const colorDot = { width: 14, height: 14, borderRadius: '50%', border: 'none', cursor: 'pointer', flexShrink: 0 }
+const saveCatBtn = { background: 'var(--accent)', color: '#fff', borderRadius: 6, padding: '5px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', marginLeft: 'auto' }
+const cancelBtn = { background: 'var(--bg-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: 6, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }
+const deleteBtn = { background: 'rgba(248,113,113,0.1)', color: '#f87171', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 6, padding: '5px 8px', fontSize: 12, cursor: 'pointer' }
+const catList = { display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', flex: 1 }
+const catItem = {
+  display: 'flex', alignItems: 'center', gap: 8,
+  padding: '6px 8px', borderRadius: 6,
+  cursor: 'pointer', transition: 'background 0.15s',
+}
 const catDot = { width: 8, height: 8, borderRadius: '50%', flexShrink: 0 }
+const editHint = { fontSize: 10, opacity: 0, transition: 'opacity 0.15s' }
 const userRow = {
   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
   padding: '12px 12px 0', borderTop: '1px solid var(--border)', marginTop: 'auto',
 }
-const signOutBtn = { background: 'var(--bg-hover)', color: 'var(--text-muted)', borderRadius: 6, padding: '5px 8px', fontSize: 14 }
+const signOutBtn = { background: 'var(--bg-hover)', color: 'var(--text-muted)', borderRadius: 6, padding: '5px 8px', fontSize: 14, cursor: 'pointer', border: '1px solid var(--border)' }
