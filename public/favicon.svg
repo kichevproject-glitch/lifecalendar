@@ -1,3 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <text y=".9em" font-size="90">🗓</text>
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="48" height="48" rx="12" fill="url(#g)"/>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10B981"/>
+      <stop offset="1" stop-color="#3B82F6"/>
+    </linearGradient>
+  </defs>
+  <rect x="12" y="13" width="4" height="4" rx="1" fill="rgba(255,255,255,0.35)"/>
+  <rect x="20" y="13" width="4" height="4" rx="1" fill="rgba(255,255,255,0.35)"/>
+  <rect x="28" y="13" width="4" height="4" rx="1" fill="rgba(255,255,255,0.35)"/>
+  <rect x="12" y="21" width="4" height="4" rx="1" fill="rgba(255,255,255,0.35)"/>
+  <rect x="20" y="21" width="4" height="4" rx="1" fill="rgba(255,255,255,0.35)"/>
+  <rect x="28" y="21" width="4" height="4" rx="1" fill="rgba(255,255,255,0.35)"/>
+  <rect x="12" y="29" width="4" height="4" rx="1" fill="rgba(255,255,255,0.35)"/>
+  <rect x="20" y="29" width="4" height="4" rx="1" fill="rgba(255,255,255,0.35)"/>
+  <rect x="28" y="29" width="4" height="4" rx="1" fill="rgba(255,255,255,0.35)"/>
+  <path d="M8 24 Q18 18 28 24 Q36 29 40 24" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M37 21 L40 24 L37 27" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

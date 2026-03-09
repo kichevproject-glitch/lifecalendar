@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
+import DayflowLogo from './DayflowLogo'
 
 const PRESET_ICONS = ['📌','💼','🏃','✈️','🌸','👨‍👩‍👧','❤️','🌿','🎵','📚','🍽️','🏖️','💡','🎯','🎉','🏋️','🚴','🧘','🎨','💻','🐾','⚽','🏔️','🛒','💰']
 const PRESET_COLORS = ['#6C63FF','#3B82F6','#10B981','#F59E0B','#EC4899','#EF4444','#8B5CF6','#84CC16','#06B6D4','#F97316','#14B8A6','#A855F7','#E11D48','#65A30D','#0EA5E9']
@@ -71,8 +72,8 @@ export default function Sidebar({ categories, onCategoryCreate, onCategoryUpdate
       {/* Logo + Theme toggle */}
       <div style={logoRow}>
         <div style={logo}>
-          <span style={{ fontSize: 22 }}>🗓</span>
-          <span style={logoText}>LifeCalendar</span>
+          <DayflowLogo size={28} />
+          <span style={logoText}>Dayflow</span>
         </div>
         <button
           onClick={toggleTheme}
@@ -224,7 +225,7 @@ const logoRow = {
   borderBottom: '1px solid var(--border)',
 }
 const logo = { display: 'flex', alignItems: 'center', gap: 8 }
-const logoText = { fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700 }
+const logoText = { fontFamily: 'Montserrat, sans-serif', fontSize: 15, fontWeight: 800, letterSpacing: '-0.01em' }
 const themeBtn = {
   background: 'var(--bg-hover)', border: '1px solid var(--border)',
   borderRadius: 8, width: 32, height: 32, fontSize: 16,

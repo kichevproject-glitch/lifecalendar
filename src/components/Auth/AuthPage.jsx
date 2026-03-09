@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
+import DayflowLogo from '../Layout/DayflowLogo'
 
 export default function AuthPage() {
   const { signIn, signUp } = useAuth()
@@ -32,10 +33,10 @@ export default function AuthPage() {
       <div style={styles.card} className="slide-in">
         {/* Logo */}
         <div style={styles.logo}>
-          <span style={styles.logoIcon}>🗓</span>
-          <span style={styles.logoText}>LifeCalendar</span>
+          <DayflowLogo size={40} />
+          <span style={styles.logoText}>Dayflow</span>
         </div>
-        <p style={styles.tagline}>Your life, beautifully organized.</p>
+        <p style={styles.tagline}>Your life in flow.</p>
 
         {/* Tabs */}
         <div style={styles.tabs}>
@@ -113,9 +114,10 @@ const styles = {
   },
   logoIcon: { fontSize: 32 },
   logoText: {
-    fontFamily: 'var(--font-display)',
-    fontSize: 24,
-    fontWeight: 700,
+    fontFamily: 'Montserrat, sans-serif',
+    fontSize: 26,
+    fontWeight: 800,
+    letterSpacing: '-0.02em',
     color: 'var(--text-primary)',
   },
   tagline: {
