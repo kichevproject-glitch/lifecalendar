@@ -3,7 +3,12 @@ import { useAuth } from '../../hooks/useAuth'
 import DayflowLogo from './DayflowLogo'
 
 const PRESET_ICONS = ['📌','💼','🏃','✈️','🌸','👨‍👩‍👧','❤️','🌿','🎵','📚','🍽️','🏖️','💡','🎯','🎉','🏋️','🚴','🧘','🎨','💻','🐾','⚽','🏔️','🛒','💰']
-const PRESET_COLORS = ['#6C63FF','#3B82F6','#10B981','#F59E0B','#EC4899','#EF4444','#8B5CF6','#84CC16','#06B6D4','#F97316','#14B8A6','#A855F7','#E11D48','#65A30D','#0EA5E9']
+const PRESET_COLORS = [
+  '#3B82F6','#22C55E','#F59E0B','#EC4899',
+  '#A855F7','#EF4444','#84CC16','#06B6D4',
+  '#F97316','#14B8A6','#E11D48','#8B5CF6',
+  '#0EA5E9','#D97706','#65A30D','#DB2777',
+]
 
 export default function Sidebar({ categories, onCategoryCreate, onCategoryUpdate, onCategoryDelete, activeView, setActiveView, theme, toggleTheme }) {
   const { user, signOut } = useAuth()
