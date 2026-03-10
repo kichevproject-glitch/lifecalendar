@@ -30,7 +30,9 @@ export default function CalendarGrid({ categories }) {
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd })
 
   function getEventsForDay(day) {
-    return events.filter(e => isSameDay(new Date(e.start_at), day))
+    return events
+      .filter(e => isSameDay(new Date(e.start_at), day))
+      .sort((a, b) => new Date(a.start_at) - new Date(b.start_at))
   }
 
   function getHolidayForDay(day) {
