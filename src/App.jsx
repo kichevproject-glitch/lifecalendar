@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 import { useCategories } from './hooks/useCategories'
+import { useSharing } from './hooks/useSharing'
 import AuthPage from './components/Auth/AuthPage'
 import CalendarGrid from './components/Calendar/CalendarGrid'
 import Sidebar from './components/Layout/Sidebar'
@@ -11,8 +12,22 @@ import SharedView from './components/Shared/SharedView'
 function AppInner() {
   const { user, loading } = useAuth()
   const { categories, createCategory, updateCategory, deleteCategory } = useCategories()
+  const { sharedEvents, acceptInvite } = useSharing()
   const [activeView, setActiveView] = useState('calendar')
   const [theme, setTheme] = useState(() => localStorage.getItem('lc-theme') || 'dark')
+
+  // Handle accept invite link (?accept=TOKEN in URL)
+  useEffect(() => {
+    if (!user) return
+    const params = new URLSearchParams(window.location.search)
+    const token  = params.get('accept')
+    if (!token) return
+    acceptInvite(token).then(() => {
+      // Clean the URL after accepting
+      window.history.replaceState({}, '', window.location.pathname)
+      setActiveView('shared')
+    })
+  }, [user]) // eslint-disable-line
 
   useEffect(() => {
     document.documentElement.classList.toggle('light', theme === 'light')
@@ -42,10 +57,10 @@ function AppInner() {
         toggleTheme={toggleTheme}
       />
       <main style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {activeView === 'calendar' && <CalendarGrid categories={categories} />}
-        {activeView === 'tasks' && <TasksView />}
-        {activeView === 'analytics' && <AnalyticsView />}
-        {activeView === 'shared' && <SharedView />}
+        {activeView === 'calendar'   && <CalendarGrid categories={categories} sharedEvents={sharedEvents} />}
+        {activeView === 'tasks'      && <TasksView />}
+        {activeView === 'analytics'  && <AnalyticsView />}
+        {activeView === 'shared'     && <SharedView />}
       </main>
     </div>
   )
