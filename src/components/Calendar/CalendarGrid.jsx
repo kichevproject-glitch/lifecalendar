@@ -37,7 +37,13 @@ export default function CalendarGrid({ categories, sharedEvents = [] }) {
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd })
 
   function getSharedEventsForDay(day) {
-    return sharedEvents.filter(e => isSameDay(new Date(e.start_at), day))
+    return sharedEvents.filter(e => {
+      const start = new Date(e.start_at)
+      const end   = e.end_at ? new Date(e.end_at) : start
+      const dayStart = new Date(day); dayStart.setHours(0,0,0,0)
+      const dayEnd   = new Date(day); dayEnd.setHours(23,59,59,999)
+      return start <= dayEnd && end >= dayStart
+    })
   }
 
   function getTasksForDay(day) {
@@ -58,7 +64,14 @@ export default function CalendarGrid({ categories, sharedEvents = [] }) {
 
   function getEventsForDay(day) {
     return events
-      .filter(e => isSameDay(new Date(e.start_at), day))
+      .filter(e => {
+        const start = new Date(e.start_at)
+        const end   = e.end_at ? new Date(e.end_at) : start
+        // Normalise to midnight for all-day comparison
+        const dayStart = new Date(day); dayStart.setHours(0,0,0,0)
+        const dayEnd   = new Date(day); dayEnd.setHours(23,59,59,999)
+        return start <= dayEnd && end >= dayStart
+      })
       .sort((a, b) => new Date(a.start_at) - new Date(b.start_at))
   }
 
