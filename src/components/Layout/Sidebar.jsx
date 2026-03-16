@@ -2,12 +2,39 @@ import { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import DayflowLogo from './DayflowLogo'
 
-const PRESET_ICONS = ['📌','💼','🏃','✈️','🌸','👨‍👩‍👧','❤️','🌿','🎵','📚','🍽️','🏖️','💡','🎯','🎉','🏋️','🚴','🧘','🎨','💻','🐾','⚽','🏔️','🛒','💰']
+// Icons organised by life category — 54 total
+const PRESET_ICONS = [
+  // Work & productivity
+  '💼','📊','📋','🖥️','📞','✉️','🏢','🤝','📝','🔬','🎓','📐',
+  // Health & fitness
+  '🏃','🏋️','🚴','🧘','🏊','❤️','💊','🥗','🧠','🩺',
+  // Travel & outdoors
+  '✈️','🚂','🚗','🏨','🧳','🏕️','🗺️','🏔️','🌊','☀️',
+  // Family & social
+  '👨‍👩‍👧','🎂','🎁','🍽️','☕','🥂','🎉','🎊','🏆',
+  // Hobbies & leisure
+  '🎵','🎨','📚','🎮','🎭','📷','🎸','🌿','🐾','⚽','🎾','🎯',
+  // Home & finance
+  '🏠','🔧','💰','💳','📈','🛒',
+]
+
 const PRESET_COLORS = [
-  '#3B82F6','#22C55E','#F59E0B','#EC4899',
-  '#A855F7','#EF4444','#84CC16','#06B6D4',
-  '#F97316','#14B8A6','#E11D48','#8B5CF6',
-  '#0EA5E9','#D97706','#65A30D','#DB2777',
+  '#EF4444', // Red
+  '#F97316', // Orange
+  '#F59E0B', // Amber
+  '#EAB308', // Yellow
+  '#84CC16', // Lime
+  '#22C55E', // Green
+  '#10B981', // Emerald
+  '#06B6D4', // Cyan
+  '#3B82F6', // Blue
+  '#6366F1', // Indigo
+  '#8B5CF6', // Purple
+  '#EC4899', // Pink
+  '#F43F5E', // Rose
+  '#64748B', // Slate
+  '#0D9488', // Teal
+  '#D97706', // Dark amber
 ]
 
 export default function Sidebar({ categories, onCategoryCreate, onCategoryUpdate, onCategoryDelete, activeView, setActiveView, theme, toggleTheme }) {
