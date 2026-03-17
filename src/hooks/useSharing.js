@@ -83,6 +83,18 @@ export function useSharing() {
 
     setSharedByOthers(merged)
 
+    // Clean up: remove own calendar from activeShared if it somehow got in
+    if (cal) {
+      setActiveShared(prev => {
+        if (prev.includes(cal.id)) {
+          const cleaned = prev.filter(id => id !== cal.id)
+          localStorage.setItem('lc-active-shared', JSON.stringify(cleaned))
+          return cleaned
+        }
+        return prev
+      })
+    }
+
     setLoading(false)
   }, [user])
 
@@ -97,15 +109,22 @@ export function useSharing() {
   async function fetchSharedEvents() {
     if (!activeShared.length) return
 
+    // Exclude own calendar from the list to prevent duplicates
+    const ownCalId = myCalendar?.id
+    const filteredIds = ownCalId ? activeShared.filter(id => id !== ownCalId) : activeShared
+    if (!filteredIds.length) { setSharedEvents([]); return }
+
     // Get owner_ids for active shared calendars
     const { data: cals } = await supabase
       .from('shared_calendars')
       .select('owner_id')
-      .in('id', activeShared)
+      .in('id', filteredIds)
 
     if (!cals || !cals.length) return
 
-    const ownerIds = cals.map(c => c.owner_id)
+    // Safety: never include own user_id
+    const ownerIds = cals.map(c => c.owner_id).filter(id => id !== user.id)
+    if (!ownerIds.length) { setSharedEvents([]); return }
 
     // Fetch events from those owners (RLS policy allows this for accepted members)
     const { data } = await supabase
