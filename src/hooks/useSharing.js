@@ -5,10 +5,10 @@ import { useAuth } from './useAuth'
 export function useSharing() {
   const { user } = useAuth()
 
-  const [myCalendar,     setMyCalendar]     = useState(null)
-  const [sharedWith,     setSharedWith]     = useState([])
+  const [myCalendar, setMyCalendar] = useState(null)
+  const [sharedWith, setSharedWith] = useState([])
   const [sharedByOthers, setSharedByOthers] = useState([])
-  const [activeShared,   setActiveShared]   = useState(() => {
+  const [activeShared, setActiveShared] = useState(() => {
     try { return JSON.parse(localStorage.getItem('lc-active-shared') || '[]') }
     catch { return [] }
   })
@@ -65,6 +65,22 @@ export function useSharing() {
       if (seen.has(m.id)) return false
       seen.add(m.id); return true
     })
+
+    // 4. Fetch owner emails for shared calendars
+    const calIds = merged.map(m => m.shared_calendars?.id).filter(Boolean)
+    if (calIds.length) {
+      const { data: owners } = await supabase.rpc('get_calendar_owner_emails', { calendar_ids: calIds })
+      if (owners) {
+        const emailMap = {}
+        owners.forEach(o => { emailMap[o.calendar_id] = o.owner_email })
+        merged.forEach(m => {
+          if (m.shared_calendars?.id) {
+            m.owner_email = emailMap[m.shared_calendars.id] || null
+          }
+        })
+      }
+    }
+
     setSharedByOthers(merged)
 
     setLoading(false)
@@ -111,10 +127,10 @@ export function useSharing() {
     const { data, error } = await supabase
       .from('calendar_members')
       .insert({
-        calendar_id:   myCalendar.id,
+        calendar_id: myCalendar.id,
         invited_email: email,
-        role:          'viewer',
-        status:        'pending',
+        role: 'viewer',
+        status: 'pending',
       })
       .select()
       .single()
@@ -123,9 +139,9 @@ export function useSharing() {
       setSharedWith(prev => [...prev, data])
       await supabase.functions.invoke('send-invite', {
         body: {
-          to:           email,
+          to: email,
           inviterEmail: user.email,
-          token:        data.invite_token,
+          token: data.invite_token,
         }
       })
     }
@@ -147,8 +163,8 @@ export function useSharing() {
     const { data, error } = await supabase
       .from('calendar_members')
       .update({
-        user_id:     user.id,
-        status:      'accepted',
+        user_id: user.id,
+        status: 'accepted',
         accepted_at: new Date().toISOString(),
       })
       .eq('invite_token', token)
