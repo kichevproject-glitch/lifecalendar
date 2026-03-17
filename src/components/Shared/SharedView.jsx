@@ -4,13 +4,12 @@ import { useSharing } from '../../hooks/useSharing'
 export default function SharedView() {
   const {
     sharedWith, sharedByOthers, activeShared,
-    inviteByEmail, revokeAccess, toggleSharedCalendar,
-    loading,
+    inviteByEmail, revokeAccess, toggleSharedCalendar, loading,
   } = useSharing()
 
   const [showInvite, setShowInvite] = useState(false)
-  const [email,      setEmail]      = useState('')
-  const [inviting,   setInviting]   = useState(false)
+  const [email, setEmail] = useState('')
+  const [inviting, setInviting] = useState(false)
   const [inviteSent, setInviteSent] = useState(false)
   const [inviteError,setInviteError]= useState('')
 
@@ -47,7 +46,6 @@ export default function SharedView() {
       </div>
 
       <div style={content}>
-
         {/* ── Section: I'm sharing with ── */}
         <div style={section}>
           <p style={sectionLabel}>I'm sharing with</p>
@@ -65,8 +63,8 @@ export default function SharedView() {
                   <span style={{
                     ...badge,
                     background: member.status === 'pending' ? 'rgba(251,191,36,0.15)' : 'rgba(52,211,153,0.12)',
-                    color:      member.status === 'pending' ? 'var(--warning)' : 'var(--success)',
-                    border:     `1px solid ${member.status === 'pending' ? 'rgba(251,191,36,0.3)' : 'rgba(52,211,153,0.3)'}`,
+                    color: member.status === 'pending' ? 'var(--warning)' : 'var(--success)',
+                    border: `1px solid ${member.status === 'pending' ? 'rgba(251,191,36,0.3)' : 'rgba(52,211,153,0.3)'}`,
                   }}>
                     {member.status === 'pending' ? 'Pending' : 'Active'}
                   </span>
@@ -85,14 +83,14 @@ export default function SharedView() {
           ) : (
             <div style={list}>
               {sharedByOthers.map(membership => {
-                const calId  = membership.shared_calendars?.id
-                const isOn   = activeShared.includes(calId)
-                const ownerEmail = membership.shared_calendars?.owner_id
+                const calId = membership.shared_calendars?.id
+                const isOn = activeShared.includes(calId)
+                const ownerDisplay = membership.owner_email || membership.shared_calendars?.name || 'Shared calendar'
                 return (
                   <div key={membership.id} style={card}>
                     <div style={{ ...avatar, background: 'rgba(52,211,153,0.12)' }}>👥</div>
                     <div style={{ flex:1 }}>
-                      <div style={cardTitle}>{membership.invited_email || 'Shared calendar'}</div>
+                      <div style={cardTitle}>{ownerDisplay}</div>
                       <div style={cardSub}>{membership.status === 'pending' ? 'Invitation pending — check your email' : 'View only'}</div>
                     </div>
                     {membership.status === 'accepted' && (
@@ -102,9 +100,17 @@ export default function SharedView() {
                         </span>
                         <div
                           onClick={() => toggleSharedCalendar(calId)}
-                          style={{ width:40, height:22, borderRadius:11, background: isOn ? 'var(--success)' : 'var(--bg-hover)', border:`1px solid ${isOn ? 'var(--success)' : 'var(--border)'}`, cursor:'pointer', position:'relative', transition:'all 0.2s', flexShrink:0 }}
+                          style={{
+                            width:40, height:22, borderRadius:11,
+                            background: isOn ? 'var(--success)' : 'var(--bg-hover)',
+                            border:`1px solid ${isOn ? 'var(--success)' : 'var(--border)'}`,
+                            cursor:'pointer', position:'relative', transition:'all 0.2s', flexShrink:0
+                          }}
                         >
-                          <div style={{ position:'absolute', top:2, left: isOn ? 20 : 2, width:16, height:16, borderRadius:'50%', background:'#fff', transition:'left 0.2s' }} />
+                          <div style={{
+                            position:'absolute', top:2, left: isOn ? 20 : 2,
+                            width:16, height:16, borderRadius:'50%', background:'#fff', transition:'left 0.2s'
+                          }} />
                         </div>
                       </div>
                     )}
@@ -130,7 +136,6 @@ export default function SharedView() {
             </div>
           </div>
         </div>
-
       </div>
 
       {/* ── Invite Modal ── */}
@@ -160,11 +165,8 @@ export default function SharedView() {
                     <div style={{ position:'relative', marginTop:4 }}>
                       <span style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', fontSize:14, pointerEvents:'none' }}>✉️</span>
                       <input
-                        type="email"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        placeholder="friend@example.com"
-                        autoFocus
+                        type="email" value={email} onChange={e => setEmail(e.target.value)}
+                        placeholder="friend@example.com" autoFocus
                         style={{ background:'var(--bg-secondary)', border:'1px solid var(--border)', borderRadius:8, padding:'9px 12px 9px 32px', color:'var(--text-primary)', fontSize:13, width:'100%' }}
                       />
                     </div>
@@ -199,25 +201,25 @@ export default function SharedView() {
 }
 
 // ── Styles ──────────────────────────────────────────────────────────
-const wrapper     = { display:'flex', flexDirection:'column', height:'100%', overflow:'hidden' }
-const pageHeader  = { display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 24px 16px', borderBottom:'1px solid var(--border)' }
-const pageTitle   = { fontFamily:'var(--font-display)', fontSize:24, fontWeight:700, margin:0 }
-const newBtn      = { background:'var(--accent)', color:'#fff', padding:'8px 18px', borderRadius:'var(--radius-sm)', fontWeight:600, fontSize:13, cursor:'pointer' }
-const content     = { flex:1, overflowY:'auto', padding:'20px 24px', display:'flex', flexDirection:'column', gap:28 }
-const section     = { display:'flex', flexDirection:'column', gap:12 }
+const wrapper = { display:'flex', flexDirection:'column', height:'100%', overflow:'hidden' }
+const pageHeader = { display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 24px 16px', borderBottom:'1px solid var(--border)' }
+const pageTitle = { fontFamily:'var(--font-display)', fontSize:24, fontWeight:700, margin:0 }
+const newBtn = { background:'var(--accent)', color:'#fff', padding:'8px 18px', borderRadius:'var(--radius-sm)', fontWeight:600, fontSize:13, cursor:'pointer' }
+const content = { flex:1, overflowY:'auto', padding:'20px 24px', display:'flex', flexDirection:'column', gap:28 }
+const section = { display:'flex', flexDirection:'column', gap:12 }
 const sectionLabel= { fontSize:11, fontWeight:700, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em', margin:0 }
-const list        = { display:'flex', flexDirection:'column', gap:8 }
-const card        = { background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:10, padding:'12px 16px', display:'flex', alignItems:'center', gap:12 }
-const avatar      = { width:36, height:36, borderRadius:'50%', background:'var(--accent-dim)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, flexShrink:0 }
-const cardTitle   = { fontSize:13, fontWeight:600, color:'var(--text-primary)' }
-const cardSub     = { fontSize:11, color:'var(--text-muted)', marginTop:2 }
-const badge       = { fontSize:11, fontWeight:600, padding:'3px 10px', borderRadius:20, flexShrink:0 }
-const revokeBtn   = { background:'rgba(248,113,113,0.1)', color:'#f87171', border:'1px solid rgba(248,113,113,0.3)', borderRadius:6, padding:'5px 10px', fontSize:11, fontWeight:600, cursor:'pointer', flexShrink:0 }
-const emptyState  = { fontSize:13, color:'var(--text-muted)', padding:'12px 0' }
-const lbl         = { fontSize:11, fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em' }
-const overlay     = { position:'fixed', inset:0, background:'rgba(0,0,0,0.65)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000, padding:16, backdropFilter:'blur(4px)' }
-const modal       = { background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:'var(--radius-lg)', width:'100%', maxWidth:440, boxShadow:'var(--shadow-lg)' }
-const modalTitle  = { fontFamily:'var(--font-display)', fontSize:18, fontWeight:700, margin:0 }
-const closeBtn    = { background:'none', color:'var(--text-muted)', fontSize:18, padding:4 }
-const cancelBtn   = { flex:1, background:'var(--bg-hover)', border:'1px solid var(--border)', color:'var(--text-secondary)', padding:'10px', borderRadius:8, fontWeight:600, fontSize:13, cursor:'pointer' }
-const submitBtn   = { flex:1, background:'var(--accent)', color:'#fff', padding:'10px', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer', border:'none' }
+const list = { display:'flex', flexDirection:'column', gap:8 }
+const card = { background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:10, padding:'12px 16px', display:'flex', alignItems:'center', gap:12 }
+const avatar = { width:36, height:36, borderRadius:'50%', background:'var(--accent-dim)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, flexShrink:0 }
+const cardTitle = { fontSize:13, fontWeight:600, color:'var(--text-primary)' }
+const cardSub = { fontSize:11, color:'var(--text-muted)', marginTop:2 }
+const badge = { fontSize:11, fontWeight:600, padding:'3px 10px', borderRadius:20, flexShrink:0 }
+const revokeBtn = { background:'rgba(248,113,113,0.1)', color:'#f87171', border:'1px solid rgba(248,113,113,0.3)', borderRadius:6, padding:'5px 10px', fontSize:11, fontWeight:600, cursor:'pointer', flexShrink:0 }
+const emptyState = { fontSize:13, color:'var(--text-muted)', padding:'12px 0' }
+const lbl = { fontSize:11, fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em' }
+const overlay = { position:'fixed', inset:0, background:'rgba(0,0,0,0.65)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000, padding:16, backdropFilter:'blur(4px)' }
+const modal = { background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:'var(--radius-lg)', width:'100%', maxWidth:440, boxShadow:'var(--shadow-lg)' }
+const modalTitle = { fontFamily:'var(--font-display)', fontSize:18, fontWeight:700, margin:0 }
+const closeBtn = { background:'none', color:'var(--text-muted)', fontSize:18, padding:4 }
+const cancelBtn = { flex:1, background:'var(--bg-hover)', border:'1px solid var(--border)', color:'var(--text-secondary)', padding:'10px', borderRadius:8, fontWeight:600, fontSize:13, cursor:'pointer' }
+const submitBtn = { flex:1, background:'var(--accent)', color:'#fff', padding:'10px', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer', border:'none' }
