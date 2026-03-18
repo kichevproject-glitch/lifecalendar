@@ -10,7 +10,7 @@ import AnalyticsView from './components/Analytics/AnalyticsView'
 import SharedView from './components/Shared/SharedView'
 
 function AppInner() {
-  const { user, loading } = useAuth()
+  const { user, loading, recoveryMode } = useAuth()
   const { categories, createCategory, updateCategory, deleteCategory } = useCategories()
   const { sharedEvents, acceptInvite } = useSharing()
   const [activeView, setActiveView] = useState('calendar')
@@ -20,7 +20,7 @@ function AppInner() {
   useEffect(() => {
     if (!user) return
     const params = new URLSearchParams(window.location.search)
-    const token  = params.get('accept')
+    const token = params.get('accept')
     if (!token) return
     acceptInvite(token).then(() => {
       // Clean the URL after accepting
@@ -42,7 +42,7 @@ function AppInner() {
     </div>
   )
 
-  if (!user) return <AuthPage />
+  if (!user || recoveryMode) return <AuthPage />
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -57,10 +57,10 @@ function AppInner() {
         toggleTheme={toggleTheme}
       />
       <main style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {activeView === 'calendar'   && <CalendarGrid categories={categories} sharedEvents={sharedEvents} />}
-        {activeView === 'tasks'      && <TasksView />}
-        {activeView === 'analytics'  && <AnalyticsView />}
-        {activeView === 'shared'     && <SharedView />}
+        {activeView === 'calendar' && <CalendarGrid categories={categories} sharedEvents={sharedEvents} />}
+        {activeView === 'tasks' && <TasksView />}
+        {activeView === 'analytics' && <AnalyticsView />}
+        {activeView === 'shared' && <SharedView />}
       </main>
     </div>
   )
