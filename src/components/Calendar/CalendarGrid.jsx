@@ -70,6 +70,10 @@ export default function CalendarGrid({ categories, sharedEvents = [], isMobile =
   const multiDayEvents = events.filter(isMultiDay)
   const singleDayEvents = events.filter(ev => !isMultiDay(ev))
 
+  // Shared events: classify the same way
+  const sharedMultiDay = sharedEvents.filter(isMultiDay)
+  const sharedSingleDay = sharedEvents.filter(ev => !isMultiDay(ev))
+
   // ── Per-day helpers ─────────────────────────────────────────────
   function getSingleEventsForDay(day) {
     return singleDayEvents
@@ -87,11 +91,15 @@ export default function CalendarGrid({ categories, sharedEvents = [], isMobile =
   }
 
   function getSharedEventsForDay(day) {
-    return sharedEvents.filter(e => {
-      const s = startOfDay(new Date(e.start_at))
-      const en = e.end_at ? startOfDay(new Date(e.end_at)) : s
-      const d = startOfDay(day)
-      return s <= d && en >= d
+    return sharedSingleDay.filter(e => isSameDay(new Date(e.start_at), day))
+  }
+
+  function getSharedMultiDayForDay(day) {
+    const d = startOfDay(day)
+    return sharedMultiDay.filter(ev => {
+      const s = startOfDay(new Date(ev.start_at))
+      const e = startOfDay(new Date(ev.end_at))
+      return s <= d && e >= d
     })
   }
 
@@ -110,6 +118,7 @@ export default function CalendarGrid({ categories, sharedEvents = [], isMobile =
     const evts = getSingleEventsForDay(day)
     const multi = getMultiDayEventsForDay(day)
     const shared = getSharedEventsForDay(day)
+    const sharedMulti = getSharedMultiDayForDay(day)
     const dayTasks = getTasksForDay(day)
     const dots = []
     const seen = new Set()
@@ -117,7 +126,7 @@ export default function CalendarGrid({ categories, sharedEvents = [], isMobile =
       const c = ev.categories?.color || '#6b7280'
       if (!seen.has(c)) { seen.add(c); dots.push(c) }
     })
-    shared.forEach(() => { if (!seen.has('#F59E0B')) { seen.add('#F59E0B'); dots.push('#F59E0B') } })
+    ;[...shared, ...sharedMulti].forEach(() => { if (!seen.has('#F59E0B')) { seen.add('#F59E0B'); dots.push('#F59E0B') } })
     dayTasks.forEach(t => {
       const c = { low: '#34d399', medium: '#fbbf24', high: '#f87171' }[t.priority] || '#888'
       if (!seen.has(c)) { seen.add(c); dots.push(c) }
@@ -151,8 +160,11 @@ export default function CalendarGrid({ categories, sharedEvents = [], isMobile =
     return slot
   }
 
-  const barData = multiDayEvents.flatMap(ev =>
-    getBarSegments(ev).map((seg, si) => ({ ev, seg, slot: assignSlot(seg.rowIdx, seg.startCol, seg.endCol), key: `${ev.id}-${si}` }))
+  const barData = [
+    ...multiDayEvents.map(ev => ({ ev, isShared: false })),
+    ...sharedMultiDay.map(ev => ({ ev, isShared: true })),
+  ].flatMap(({ ev, isShared }) =>
+    getBarSegments(ev).map((seg, si) => ({ ev, isShared, seg, slot: assignSlot(seg.rowIdx, seg.startCol, seg.endCol), key: `${isShared ? 's-' : ''}${ev.id}-${si}` }))
   )
 
   // ── Event handlers ─────────────────────────────────────────────
@@ -387,21 +399,22 @@ export default function CalendarGrid({ categories, sharedEvents = [], isMobile =
         {/* Multi-day bar overlay */}
         {CW > 0 && CH > 0 && (
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-            {barData.map(({ ev, seg, slot, key }) => {
+            {barData.map(({ ev, isShared, seg, slot, key }) => {
               const top = seg.rowIdx * CH + DAY_NUM_H + slot * (BAR_H + BAR_GAP)
               const left = seg.startCol * CW + (seg.isStart ? 3 : 0)
               const width = (seg.endCol - seg.startCol + 1) * CW - (seg.isStart ? 3 : 0) - (seg.isEnd ? 3 : 0)
               const color = ev.categories?.color || '#6b7280'
               const radius = seg.isStart && seg.isEnd ? 4 : seg.isStart ? '4px 0 0 4px' : seg.isEnd ? '0 4px 4px 0' : 0
               return (
-                <div key={key} onClick={e => { e.stopPropagation(); handleEventClick(e, ev) }} style={{
-                  position: 'absolute', top, left, width, height: BAR_H, background: color, borderRadius: radius,
+                <div key={key} onClick={e => { e.stopPropagation(); if (!isShared) handleEventClick(e, ev) }} style={{
+                  position: 'absolute', top, left, width, height: BAR_H, background: isShared ? color + 'CC' : color, borderRadius: radius,
                   display: 'flex', alignItems: 'center', paddingLeft: seg.isStart ? 6 : 3, overflow: 'hidden',
-                  boxSizing: 'border-box', pointerEvents: 'auto', cursor: 'pointer', zIndex: 10,
+                  boxSizing: 'border-box', pointerEvents: 'auto', cursor: isShared ? 'default' : 'pointer', zIndex: 10,
+                  opacity: isShared ? 0.85 : 1,
                 }}>
                   {seg.isStart && (
                     <>
-                      <span style={{ fontSize: 11, marginRight: 4, flexShrink: 0 }}>{ev.categories?.icon || '📌'}</span>
+                      <span style={{ fontSize: 11, marginRight: 4, flexShrink: 0 }}>{isShared ? '👥' : (ev.categories?.icon || '📌')}</span>
                       <span style={{ fontSize: 10, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ev.title}</span>
                     </>
                   )}
