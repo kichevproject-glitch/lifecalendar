@@ -1,0 +1,554 @@
+/* Theme Variables */
+:root[data-theme="light"] {
+  /* Background Colors */
+  --bg-primary: #F0EFEB;
+  --bg-secondary: rgba(255, 255, 255, 0.5);
+  --bg-hover: rgba(0, 0, 0, 0.05);
+  --bg-active: rgba(0, 0, 0, 0.08);
+  
+  /* Text Colors */
+  --text-primary: #202020;
+  --text-secondary: #666;
+  --text-tertiary: #888;
+  
+  /* Accent Colors */
+  --accent-primary: #22C55E;
+  --accent-hover: #16a34a;
+  
+  /* Border Colors */
+  --border-light: rgba(0, 0, 0, 0.08);
+  --border-medium: rgba(0, 0, 0, 0.12);
+  
+  /* View Switcher */
+  --view-switcher-bg: rgba(0, 0, 0, 0.05);
+  --view-switcher-active: #22C55E;
+  --view-switcher-text: #666;
+  --view-switcher-active-text: #000;
+  
+  /* Logo */
+  --logo-gradient: linear-gradient(135deg, #22C55E 0%, #3B82F6 100%);
+}
+
+:root[data-theme="dark"] {
+  /* Background Colors */
+  --bg-primary: linear-gradient(135deg, #0f1729 0%, #2d1b4e 100%);
+  --bg-secondary: rgba(255, 255, 255, 0.1);
+  --bg-hover: rgba(255, 255, 255, 0.08);
+  --bg-active: rgba(255, 255, 255, 0.12);
+  
+  /* Text Colors */
+  --text-primary: #f5f0e8;
+  --text-secondary: rgba(245, 240, 232, 0.5);
+  --text-tertiary: rgba(245, 240, 232, 0.4);
+  
+  /* Accent Colors */
+  --accent-primary: #8b7cf6;
+  --accent-hover: #7c6ce5;
+  
+  /* Border Colors */
+  --border-light: rgba(255, 255, 255, 0.12);
+  --border-medium: rgba(255, 255, 255, 0.2);
+  
+  /* View Switcher */
+  --view-switcher-bg: rgba(255, 255, 255, 0.08);
+  --view-switcher-active: #8b7cf6;
+  --view-switcher-text: rgba(245, 240, 232, 0.5);
+  --view-switcher-active-text: #fff;
+  
+  /* Logo - Enhanced brightness for dark theme */
+  --logo-gradient: linear-gradient(135deg, #4ade80 0%, #60a5fa 100%);
+  --logo-brightness: brightness(1.3);
+}
+
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+/* Theme Application */
+body[data-theme="light"] {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+body[data-theme="dark"] {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Logo */
+.logo-gradient {
+  font-size: 24px;
+  font-weight: 800;
+  background: var(--logo-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: var(--logo-brightness, none);
+}
+
+/* Loading Screen */
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+.loading-screen .logo-gradient {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+/* Calendar Container */
+.calendar-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.calendar-header {
+  padding: 32px 48px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+/* View Switcher */
+.view-switcher {
+  display: flex;
+  background: var(--view-switcher-bg);
+  border-radius: 25px;
+  padding: 6px;
+  gap: 6px;
+}
+
+.view-switcher button {
+  padding: 10px 28px;
+  border: none;
+  background: transparent;
+  border-radius: 20px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--view-switcher-text);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-switcher button.active {
+  background: var(--view-switcher-active);
+  color: var(--view-switcher-active-text);
+}
+
+.view-switcher button:hover:not(.active) {
+  background: var(--bg-hover);
+}
+
+/* Add Button */
+.add-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent-primary);
+  color: var(--view-switcher-active-text);
+  font-size: 28px;
+  font-weight: 300;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.add-btn:hover {
+  background: var(--accent-hover);
+  transform: scale(1.05);
+}
+
+/* Calendar Main */
+.calendar-main {
+  padding: 48px;
+  flex: 1;
+}
+
+/* Calendar Actions */
+.calendar-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 48px;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.month-navigation {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.month-title {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.month-nav-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.nav-arrow {
+  width: 48px;
+  height: 48px;
+  border: none;
+  background: var(--bg-hover);
+  border-radius: 50%;
+  font-size: 24px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.nav-arrow:hover {
+  background: var(--bg-active);
+}
+
+/* Quick Actions */
+.quick-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.today-btn,
+.action-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 25px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.today-btn {
+  background: var(--accent-primary);
+  color: var(--view-switcher-active-text);
+}
+
+.today-btn:hover {
+  background: var(--accent-hover);
+}
+
+.action-btn {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.action-btn:hover {
+  background: var(--bg-active);
+}
+
+/* Calendar Grid */
+.calendar-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.weekday {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 16px;
+  grid-auto-rows: 130px;
+}
+
+/* Calendar Day */
+.calendar-day {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.calendar-day:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border-color: var(--border-medium);
+}
+
+.calendar-day.today {
+  border: 2px solid var(--accent-primary);
+}
+
+.calendar-day.other-month {
+  opacity: 0.3;
+}
+
+.day-number {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.calendar-day.today .day-number {
+  background: var(--accent-primary);
+  color: var(--view-switcher-active-text);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Event Chips */
+.event-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.event-chip,
+.task-chip {
+  height: 26px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.event-chip:hover,
+.task-chip:hover {
+  transform: scale(1.02);
+  z-index: 10;
+}
+
+.task-chip {
+  background: transparent;
+  border: 2px dashed;
+}
+
+.chip-icon,
+.shared-icon {
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.chip-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chip-time {
+  margin-left: auto;
+  font-size: 10px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.priority-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Coming Soon Modal */
+.coming-soon-modal {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  padding: 48px;
+  max-width: 400px;
+  text-align: center;
+}
+
+.coming-soon-modal h2 {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.coming-soon-modal p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.coming-soon-modal .btn-primary {
+  margin-top: 24px;
+  padding: 12px 32px;
+  background: var(--accent-primary);
+  color: var(--view-switcher-active-text);
+  border: none;
+  border-radius: 25px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.coming-soon-modal .btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .calendar-header {
+    padding: 20px;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .header-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .view-switcher button {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .add-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+  }
+
+  .calendar-main {
+    padding: 20px;
+  }
+
+  .calendar-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .month-title {
+    font-size: 28px;
+  }
+
+  .month-nav-buttons .nav-arrow {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+
+  .weekdays {
+    gap: 8px;
+  }
+
+  .weekday {
+    font-size: 11px;
+  }
+
+  .calendar-days {
+    gap: 8px;
+    grid-auto-rows: 48px;
+  }
+
+  .calendar-day {
+    padding: 6px;
+  }
+
+  .day-number {
+    font-size: 14px;
+  }
+
+  .calendar-day.today .day-number {
+    width: 28px;
+    height: 28px;
+  }
+
+  .event-chip,
+  .task-chip {
+    height: 14px;
+    font-size: 7px;
+    padding: 0 4px;
+    gap: 2px;
+  }
+
+  .chip-icon,
+  .shared-icon {
+    font-size: 6px;
+  }
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
