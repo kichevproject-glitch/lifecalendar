@@ -1,89 +1,75 @@
-import { useState, useEffect } from 'react';
-import { AuthProvider, useAuth } from './hooks/useAuth';
-import { useCategories } from './hooks/useCategories';
-import { useSharing } from './hooks/useSharing';
-import AuthPage from './components/Auth/AuthPage';
-import CalendarGrid from './components/Calendar/CalendarGrid';
-import Sidebar from './components/Layout/Sidebar';
-import TasksView from './components/Tasks/TasksView';
-import AnalyticsView from './components/Analytics/AnalyticsView';
-import SharedView from './components/Shared/SharedView';
-import './styles/globals.css';
+import { useState, useEffect } from 'react'
+import { AuthProvider, useAuth } from './hooks/useAuth'
+import { useCategories } from './hooks/useCategories'
+import { useSharing } from './hooks/useSharing'
+import AuthPage from './components/Auth/AuthPage'
+import CalendarGrid from './components/Calendar/CalendarGrid'
+import Sidebar from './components/Layout/Sidebar'
+import TasksView from './components/Tasks/TasksView'
+import AnalyticsView from './components/Analytics/AnalyticsView'
+import SharedView from './components/Shared/SharedView'
 
 function AppInner() {
-  const { user, loading, recoveryMode } = useAuth();
-  const { categories, createCategory, updateCategory, deleteCategory } = useCategories();
-  const { sharedEvents, acceptInvite } = useSharing();
-  const [activeView, setActiveView] = useState('calendar');
-  const [theme, setTheme] = useState('light');
-
-  useEffect(() => {
-    // Load theme from localStorage
-    const savedTheme = localStorage.getItem('lc-theme') || 'dark';
-    setTheme(savedTheme);
-    document.documentElement.setAttribute('data-theme', savedTheme);
-  }, []);
+  const { user, loading, recoveryMode } = useAuth()
+  const { categories, createCategory, updateCategory, deleteCategory } = useCategories()
+  const { sharedEvents, acceptInvite } = useSharing()
+  const [activeView, setActiveView] = useState('calendar')
+  const [theme, setTheme] = useState(() => localStorage.getItem('lc-theme') || 'dark')
 
   // Handle accept invite link (?accept=TOKEN in URL)
   useEffect(() => {
-    if (!user) return;
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('accept');
-    if (!token) return;
+    if (!user) return
+    const params = new URLSearchParams(window.location.search)
+    const token = params.get('accept')
+    if (!token) return
     acceptInvite(token).then(() => {
       // Clean the URL after accepting
-      window.history.replaceState({}, '', window.location.pathname);
-    });
-  }, [user, acceptInvite]);
+      window.history.replaceState({}, '', window.location.pathname)
+      setActiveView('shared')
+    })
+  }, [user]) // eslint-disable-line
 
-  if (loading) {
-    return (
-      <div className="loading-screen">
-        <div className="logo-gradient">Dayflow</div>
-        <p>Loading...</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    document.documentElement.classList.toggle('light', theme === 'light')
+    localStorage.setItem('lc-theme', theme)
+  }, [theme])
 
-  if (!user || recoveryMode) {
-    return <AuthPage />;
-  }
+  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
+
+  if (loading) return (
+    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: 32, height: 32, border: '3px solid var(--border)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+    </div>
+  )
+
+  if (!user || recoveryMode) return <AuthPage />
 
   return (
-    <div className="app-container">
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <Sidebar
+        categories={categories}
+        onCategoryCreate={createCategory}
+        onCategoryUpdate={updateCategory}
+        onCategoryDelete={deleteCategory}
         activeView={activeView}
         setActiveView={setActiveView}
         theme={theme}
-        setTheme={setTheme}
+        toggleTheme={toggleTheme}
       />
-      <main className="app-main">
-        {activeView === 'calendar' && (
-          <CalendarGrid
-            categories={categories}
-            sharedEvents={sharedEvents}
-          />
-        )}
-        {activeView === 'tasks' && (
-          <TasksView categories={categories} />
-        )}
-        {activeView === 'analytics' && (
-          <AnalyticsView />
-        )}
-        {activeView === 'shared' && (
-          <SharedView />
-        )}
+      <main style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {activeView === 'calendar' && <CalendarGrid categories={categories} sharedEvents={sharedEvents} />}
+        {activeView === 'tasks' && <TasksView />}
+        {activeView === 'analytics' && <AnalyticsView />}
+        {activeView === 'shared' && <SharedView />}
       </main>
     </div>
-  );
+  )
 }
 
-function App() {
+export default function App() {
   return (
     <AuthProvider>
       <AppInner />
     </AuthProvider>
-  );
+  )
 }
-
-export default App;
