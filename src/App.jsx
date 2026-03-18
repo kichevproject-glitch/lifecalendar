@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
-import Auth from './components/Auth';
+import AuthPage from './components/AuthPage';
 import Calendar from './components/Calendar';
 import Settings from './components/Settings';
-import SharedCalendar from './components/SharedCalendar';
+import Sharedview from './components/Shared/Sharedview';
 import './styles/globals.css';
 
 function App() {
@@ -63,7 +63,7 @@ function App() {
   }
 
   if (!session) {
-    return <Auth />;
+    return <AuthPage />;
   }
 
   return (
@@ -92,7 +92,7 @@ function App() {
         />
         <Route
           path="/shared/:token"
-          element={<SharedCalendar theme={theme} />}
+          element={<Sharedview theme={theme} />}
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
