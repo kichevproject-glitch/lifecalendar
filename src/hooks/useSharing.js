@@ -19,7 +19,6 @@ export function useSharing() {
     if (!user) return
     setLoading(true)
 
-    // 1. Get or create my shared calendar record
     let { data: cal } = await supabase
       .from('shared_calendars')
       .select('*')
@@ -37,7 +36,6 @@ export function useSharing() {
     setMyCalendar(cal)
 
     if (cal) {
-      // 2. People I've shared with
       const { data: members } = await supabase
         .from('calendar_members')
         .select('*')
@@ -46,7 +44,6 @@ export function useSharing() {
       setSharedWith(members || [])
     }
 
-    // 3. Calendars shared with me — look up by user_id OR by email (for pending invites)
     const { data: byUserId } = await supabase
       .from('calendar_members')
       .select('*, shared_calendars(id, name, owner_id)')
@@ -58,7 +55,6 @@ export function useSharing() {
       .eq('invited_email', user.email)
       .is('user_id', null)
 
-    // Merge and deduplicate
     const all = [...(byUserId || []), ...(byEmail || [])]
     const seen = new Set()
     const merged = all.filter(m => {
@@ -66,7 +62,6 @@ export function useSharing() {
       seen.add(m.id); return true
     })
 
-    // 4. Fetch owner emails for shared calendars
     const calIds = merged.map(m => m.shared_calendars?.id).filter(Boolean)
     if (calIds.length) {
       const { data: owners } = await supabase.rpc('get_calendar_owner_emails', { calendar_ids: calIds })
@@ -83,7 +78,6 @@ export function useSharing() {
 
     setSharedByOthers(merged)
 
-    // Clean up: remove own calendar from activeShared if it somehow got in
     if (cal) {
       setActiveShared(prev => {
         if (prev.includes(cal.id)) {
@@ -100,21 +94,19 @@ export function useSharing() {
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
-  // Fetch events from owners of active shared calendars
+  // FIX: depend on user?.id so this re-runs after auth is ready on refresh
   useEffect(() => {
-    if (!activeShared.length) { setSharedEvents([]); return }
+    if (!user || !activeShared.length) { setSharedEvents([]); return }
     fetchSharedEvents()
-  }, [activeShared.join(',')]) // eslint-disable-line
+  }, [activeShared.join(','), user?.id]) // eslint-disable-line
 
   async function fetchSharedEvents() {
-    if (!activeShared.length) return
+    if (!user || !activeShared.length) return
 
-    // Exclude own calendar from the list to prevent duplicates
     const ownCalId = myCalendar?.id
     const filteredIds = ownCalId ? activeShared.filter(id => id !== ownCalId) : activeShared
     if (!filteredIds.length) { setSharedEvents([]); return }
 
-    // Get owner_ids for active shared calendars
     const { data: cals } = await supabase
       .from('shared_calendars')
       .select('owner_id')
@@ -122,11 +114,9 @@ export function useSharing() {
 
     if (!cals || !cals.length) return
 
-    // Safety: never include own user_id
     const ownerIds = cals.map(c => c.owner_id).filter(id => id !== user.id)
     if (!ownerIds.length) { setSharedEvents([]); return }
 
-    // Fetch events from those owners (RLS policy allows this for accepted members)
     const { data } = await supabase
       .from('events')
       .select('*, categories(id, name, color, icon)')
@@ -136,10 +126,8 @@ export function useSharing() {
     setSharedEvents(data || [])
   }
 
-  // Invite someone by email
   async function inviteByEmail(email) {
     if (!myCalendar) return { error: new Error('No calendar found') }
-
     const existing = sharedWith.find(m => m.invited_email === email)
     if (existing) return { error: new Error('Already invited') }
 
@@ -167,7 +155,6 @@ export function useSharing() {
     return { data, error }
   }
 
-  // Revoke access
   async function revokeAccess(memberId) {
     const { error } = await supabase
       .from('calendar_members')
@@ -177,7 +164,6 @@ export function useSharing() {
     return { error }
   }
 
-  // Accept invitation — update the row and auto-enable the calendar
   async function acceptInvite(token) {
     const { data, error } = await supabase
       .from('calendar_members')
@@ -191,7 +177,6 @@ export function useSharing() {
       .single()
 
     if (!error && data) {
-      // Auto-enable the shared calendar so events show immediately
       const calId = data.shared_calendars?.id
       if (calId) {
         setActiveShared(prev => {
@@ -206,7 +191,6 @@ export function useSharing() {
     return { data, error }
   }
 
-  // Toggle a shared calendar on/off
   function toggleSharedCalendar(calendarId) {
     setActiveShared(prev => {
       const next = prev.includes(calendarId)
