@@ -3,7 +3,7 @@ import { useAuth } from '../../hooks/useAuth'
 import DayflowLogo from '../Layout/DayflowLogo'
 
 export default function AuthPage() {
-  const { signIn, signUp, resetPassword, updatePassword, user } = useAuth()
+  const { signIn, signUp, resetPassword, updatePassword, recoveryMode } = useAuth()
   const [mode, setMode] = useState('login') // 'login' | 'register' | 'forgot' | 'reset'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -12,23 +12,12 @@ export default function AuthPage() {
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // Detect password recovery redirect (Supabase sets hash params)
+  // When recoveryMode is true (set by useAuth on PASSWORD_RECOVERY event), show reset form
   useEffect(() => {
-    const hash = window.location.hash
-    if (hash && hash.includes('type=recovery')) {
+    if (recoveryMode) {
       setMode('reset')
-      // Clean up the URL hash
-      window.history.replaceState({}, '', window.location.pathname + window.location.search)
     }
-  }, [])
-
-  // If user is logged in and in reset mode, show the reset form
-  // (Supabase auto-authenticates from the recovery link)
-  useEffect(() => {
-    if (user && mode === 'reset') {
-      // Stay in reset mode — user needs to set new password
-    }
-  }, [user, mode])
+  }, [recoveryMode])
 
   async function handleSubmit(e) {
     e.preventDefault()
