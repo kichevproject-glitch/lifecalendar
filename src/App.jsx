@@ -1,57 +1,40 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { supabase } from './lib/supabase';
+import { AuthProvider, useAuth } from './hooks/useAuth';
+import { useCategories } from './hooks/useCategories';
+import { useSharing } from './hooks/useSharing';
 import AuthPage from './components/Auth/AuthPage';
-import Calendar from './components/Calendar';
-import Settings from './components/Settings';
+import CalendarGrid from './components/Calendar/CalendarGrid';
+import Sidebar from './components/Layout/Sidebar';
+import TasksView from './components/Tasks/TasksView';
+import AnalyticsView from './components/Analytics/AnalyticsView';
 import SharedView from './components/Shared/SharedView';
 import './styles/globals.css';
 
-function App() {
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
+function AppInner() {
+  const { user, loading, recoveryMode } = useAuth();
+  const { categories, createCategory, updateCategory, deleteCategory } = useCategories();
+  const { sharedEvents, acceptInvite } = useSharing();
+  const [activeView, setActiveView] = useState('calendar');
   const [theme, setTheme] = useState('light');
-  const [currentView, setCurrentView] = useState('month');
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   useEffect(() => {
     // Load theme from localStorage
-    const savedTheme = localStorage.getItem('dayflow-theme') || 'light';
+    const savedTheme = localStorage.getItem('lc-theme') || 'dark';
     setTheme(savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
   }, []);
 
+  // Handle accept invite link (?accept=TOKEN in URL)
   useEffect(() => {
-    // Load view preference from localStorage
-    const savedView = localStorage.getItem('dayflow-view') || 'month';
-    setCurrentView(savedView);
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('dayflow-theme', newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
-  };
-
-  const changeView = (view) => {
-    setCurrentView(view);
-    localStorage.setItem('dayflow-view', view);
-  };
+    if (!user) return;
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('accept');
+    if (!token) return;
+    acceptInvite(token).then(() => {
+      // Clean the URL after accepting
+      window.history.replaceState({}, '', window.location.pathname);
+    });
+  }, [user, acceptInvite]);
 
   if (loading) {
     return (
@@ -62,41 +45,44 @@ function App() {
     );
   }
 
-  if (!session) {
+  if (!user || recoveryMode) {
     return <AuthPage />;
   }
 
   return (
-    <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Calendar
-              session={session}
-              theme={theme}
-              currentView={currentView}
-              onViewChange={changeView}
-            />
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <Settings
-              session={session}
-              theme={theme}
-              onThemeToggle={toggleTheme}
-            />
-          }
-        />
-        <Route
-          path="/shared/:token"
-          element={<SharedView theme={theme} />}
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+    <div className="app-container">
+      <Sidebar
+        activeView={activeView}
+        setActiveView={setActiveView}
+        theme={theme}
+        setTheme={setTheme}
+      />
+      <main className="app-main">
+        {activeView === 'calendar' && (
+          <CalendarGrid
+            categories={categories}
+            sharedEvents={sharedEvents}
+          />
+        )}
+        {activeView === 'tasks' && (
+          <TasksView categories={categories} />
+        )}
+        {activeView === 'analytics' && (
+          <AnalyticsView />
+        )}
+        {activeView === 'shared' && (
+          <SharedView />
+        )}
+      </main>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppInner />
+    </AuthProvider>
   );
 }
 
