@@ -1,100 +1,103 @@
-import { useState, useEffect } from 'react'
-import { AuthProvider, useAuth } from './hooks/useAuth'
-import { useCategories } from './hooks/useCategories'
-import { useSharing } from './hooks/useSharing'
-import AuthPage from './components/Auth/AuthPage'
-import CalendarGrid from './components/Calendar/CalendarGrid'
-import Sidebar from './components/Layout/Sidebar'
-import BottomTabBar from './components/Layout/BottomTabBar'
-import MobileSettings from './components/Layout/MobileSettings'
-import TasksView from './components/Tasks/TasksView'
-import AnalyticsView from './components/Analytics/AnalyticsView'
-import SharedView from './components/Shared/SharedView'
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { supabase } from './lib/supabase';
+import Auth from './components/Auth';
+import Calendar from './components/Calendar';
+import Settings from './components/Settings';
+import SharedCalendar from './components/SharedCalendar';
+import './styles/globals.css';
 
-function useIsMobile(breakpoint = 768) {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < breakpoint)
-  useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < breakpoint)
-    window.addEventListener('resize', handler)
-    return () => window.removeEventListener('resize', handler)
-  }, [breakpoint])
-  return isMobile
-}
-
-function AppInner() {
-  const { user, loading, recoveryMode } = useAuth()
-  const { categories, createCategory, updateCategory, deleteCategory } = useCategories()
-  const { sharedEvents, acceptInvite } = useSharing()
-  const [activeView, setActiveView] = useState('calendar')
-  const [theme, setTheme] = useState(() => localStorage.getItem('lc-theme') || 'dark')
-  const isMobile = useIsMobile()
-
-  // Handle accept invite link (?accept=TOKEN in URL)
-  useEffect(() => {
-    if (!user) return
-    const params = new URLSearchParams(window.location.search)
-    const token = params.get('accept')
-    if (!token) return
-    acceptInvite(token).then(() => {
-      window.history.replaceState({}, '', window.location.pathname)
-      setActiveView('shared')
-    })
-  }, [user]) // eslint-disable-line
+function App() {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [theme, setTheme] = useState('light');
+  const [currentView, setCurrentView] = useState('month');
 
   useEffect(() => {
-    document.documentElement.classList.toggle('light', theme === 'light')
-    localStorage.setItem('lc-theme', theme)
-  }, [theme])
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
 
-  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
 
-  if (loading) return (
-    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 32, height: 32, border: '3px solid var(--border)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-    </div>
-  )
+    return () => subscription.unsubscribe();
+  }, []);
 
-  if (!user || recoveryMode) return <AuthPage />
+  useEffect(() => {
+    // Load theme from localStorage
+    const savedTheme = localStorage.getItem('dayflow-theme') || 'light';
+    setTheme(savedTheme);
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }, []);
+
+  useEffect(() => {
+    // Load view preference from localStorage
+    const savedView = localStorage.getItem('dayflow-view') || 'month';
+    setCurrentView(savedView);
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('dayflow-theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
+
+  const changeView = (view) => {
+    setCurrentView(view);
+    localStorage.setItem('dayflow-view', view);
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <div className="logo-gradient">Dayflow</div>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <Auth />;
+  }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      {!isMobile && (
-        <Sidebar
-          categories={categories}
-          onCategoryCreate={createCategory}
-          onCategoryUpdate={updateCategory}
-          onCategoryDelete={deleteCategory}
-          activeView={activeView}
-          setActiveView={setActiveView}
-          theme={theme}
-          toggleTheme={toggleTheme}
+    <Router>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Calendar
+              session={session}
+              theme={theme}
+              currentView={currentView}
+              onViewChange={changeView}
+            />
+          }
         />
-      )}
-      <main style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? 64 : 0 }}>
-        {activeView === 'calendar' && <CalendarGrid categories={categories} sharedEvents={sharedEvents} isMobile={isMobile} />}
-        {activeView === 'tasks' && <TasksView />}
-        {activeView === 'analytics' && <AnalyticsView />}
-        {activeView === 'shared' && <SharedView />}
-        {activeView === 'settings' && isMobile && (
-          <MobileSettings
-            categories={categories}
-            onCategoryCreate={createCategory}
-            onCategoryUpdate={updateCategory}
-            onCategoryDelete={deleteCategory}
-            theme={theme}
-            toggleTheme={toggleTheme}
-          />
-        )}
-      </main>
-      {isMobile && <BottomTabBar activeView={activeView} setActiveView={setActiveView} />}
-    </div>
-  )
+        <Route
+          path="/settings"
+          element={
+            <Settings
+              session={session}
+              theme={theme}
+              onThemeToggle={toggleTheme}
+            />
+          }
+        />
+        <Route
+          path="/shared/:token"
+          element={<SharedCalendar theme={theme} />}
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default function App() {
-  return (
-    <AuthProvider>
-      <AppInner />
-    </AuthProvider>
-  )
-}
+export default App;
