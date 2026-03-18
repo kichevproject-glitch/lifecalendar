@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
-import AuthPage from './components/AuthPage';
+import AuthPage from './components/Auth/AuthPage';
 import Calendar from './components/Calendar';
 import Settings from './components/Settings';
-import Sharedview from './components/Shared/Sharedview';
+import SharedView from './components/Shared/SharedView';
 import './styles/globals.css';
 
 function App() {
@@ -92,7 +92,7 @@ function App() {
         />
         <Route
           path="/shared/:token"
-          element={<Sharedview theme={theme} />}
+          element={<SharedView theme={theme} />}
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
