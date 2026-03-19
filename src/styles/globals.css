@@ -572,3 +572,207 @@ body[data-theme="dark"] {
   z-index: 1000;
   backdrop-filter: blur(4px);
 }
+
+
+/* ========================================
+   PHASE 1: DESKTOP REDESIGN STYLES
+   Add these to the END of src/styles/globals.css
+   ======================================== */
+
+/* App Container */
+.app-redesign {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Desktop Header */
+.desktop-header-redesign {
+  padding: 16px 48px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+/* Month Navigation */
+.month-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav-arrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.nav-arrow:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent-primary);
+}
+
+.month-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 160px;
+  text-align: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* View Switcher */
+.view-switcher-redesign {
+  display: flex;
+  background: var(--bg-tertiary);
+  border-radius: 25px;
+  padding: 6px 12px;
+}
+
+.view-switcher-redesign button {
+  padding: 8px 24px;
+  border: none;
+  background: transparent;
+  border-radius: 20px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.view-switcher-redesign button.active {
+  background: var(--accent-primary);
+  color: var(--accent-text);
+}
+
+/* Today Button */
+.today-btn {
+  padding: 8px 20px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.today-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent-primary);
+}
+
+/* Add Button */
+.add-btn-redesign {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--accent-text);
+  font-weight: 300;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.add-btn-redesign:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 20px var(--accent-shadow);
+}
+
+/* Sidebar - Auto-hide */
+.sidebar-redesign {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: 100;
+}
+
+.sidebar-redesign.visible {
+  transform: translateX(0);
+}
+
+/* Hover Trigger */
+.sidebar-hover-trigger {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  z-index: 50;
+  background: transparent;
+}
+
+/* Main Content */
+.main-content-redesign {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* CSS Variable Additions */
+:root.light {
+  --bg-tertiary: rgba(0,0,0,0.05);
+  --accent-secondary: #3B82F6;
+  --accent-text: #000;
+  --accent-shadow: rgba(34,197,94,0.3);
+}
+
+:root.dark,
+:root {
+  --bg-tertiary: rgba(255,255,255,0.08);
+  --accent-secondary: #60a5fa;
+  --accent-text: #fff;
+  --accent-shadow: rgba(139,92,246,0.3);
+}
