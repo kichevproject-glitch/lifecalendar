@@ -37,7 +37,18 @@ const PRESET_COLORS = [
   '#D97706', // Dark amber
 ]
 
-export default function Sidebar({ categories, onCategoryCreate, onCategoryUpdate, onCategoryDelete, activeView, setActiveView, theme, toggleTheme }) {
+export default function Sidebar({
+  categories,
+  onCategoryCreate,
+  onCategoryUpdate,
+  onCategoryDelete,
+  activeView,
+  setActiveView,
+  theme,
+  toggleTheme,
+  visible,
+  onMouseLeave
+}) {
   const { user, signOut } = useAuth()
 
   // New category form
@@ -100,7 +111,10 @@ export default function Sidebar({ categories, onCategoryCreate, onCategoryUpdate
   ]
 
   return (
-    <aside style={sidebar}>
+    <aside 
+      className={`sidebar-redesign ${visible ? 'visible' : ''}`}
+      onMouseLeave={onMouseLeave}
+    >
       {/* Logo + Theme toggle */}
       <div style={logoRow}>
         <div style={logo}>
@@ -122,7 +136,10 @@ export default function Sidebar({ categories, onCategoryCreate, onCategoryUpdate
           <button
             key={item.id}
             onClick={() => setActiveView(item.id)}
-            style={{ ...navItem, ...(activeView === item.id ? navItemActive : {}) }}
+            style={{
+              ...navItem,
+              ...(activeView === item.id ? navItemActive : {})
+            }}
           >
             <span>{item.icon}</span>
             <span>{item.label}</span>
@@ -158,8 +175,15 @@ export default function Sidebar({ categories, onCategoryCreate, onCategoryUpdate
             <div style={pickerLabel}>Icon</div>
             <div style={iconGrid}>
               {PRESET_ICONS.map(ic => (
-                <button key={ic} type="button" onClick={() => setNewIcon(ic)}
-                  style={{ ...iconBtn, background: newIcon === ic ? 'var(--accent-dim)' : 'transparent', outline: newIcon === ic ? '1px solid var(--accent)' : 'none' }}>
+                <button
+                  key={ic}
+                  type="button"
+                  onClick={() => setNewIcon(ic)}
+                  style={{
+                    ...iconBtn,
+                    background: newIcon === ic ? 'var(--accent-dim)' : 'transparent',
+                    outline: newIcon === ic ? '1px solid var(--accent)' : 'none'
+                  }}>
                   {ic}
                 </button>
               ))}
@@ -167,8 +191,17 @@ export default function Sidebar({ categories, onCategoryCreate, onCategoryUpdate
             <div style={pickerLabel}>Color</div>
             <div style={colorGrid}>
               {PRESET_COLORS.map(c => (
-                <button key={c} type="button" onClick={() => setNewColor(c)}
-                  style={{ ...colorDot, background: c, outline: newColor === c ? `2px solid ${c}` : 'none', outlineOffset: 2 }} />
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setNewColor(c)}
+                  style={{
+                    ...colorDot,
+                    background: c,
+                    outline: newColor === c ? `2px solid ${c}` : 'none',
+                    outlineOffset: 2
+                  }}
+                />
               ))}
             </div>
             <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
@@ -194,8 +227,15 @@ export default function Sidebar({ categories, onCategoryCreate, onCategoryUpdate
                   <div style={pickerLabel}>Icon</div>
                   <div style={iconGrid}>
                     {PRESET_ICONS.map(ic => (
-                      <button key={ic} type="button" onClick={() => setEditIcon(ic)}
-                        style={{ ...iconBtn, background: editIcon === ic ? 'var(--accent-dim)' : 'transparent', outline: editIcon === ic ? '1px solid var(--accent)' : 'none' }}>
+                      <button
+                        key={ic}
+                        type="button"
+                        onClick={() => setEditIcon(ic)}
+                        style={{
+                          ...iconBtn,
+                          background: editIcon === ic ? 'var(--accent-dim)' : 'transparent',
+                          outline: editIcon === ic ? '1px solid var(--accent)' : 'none'
+                        }}>
                         {ic}
                       </button>
                     ))}
@@ -203,8 +243,17 @@ export default function Sidebar({ categories, onCategoryCreate, onCategoryUpdate
                   <div style={pickerLabel}>Color</div>
                   <div style={colorGrid}>
                     {PRESET_COLORS.map(c => (
-                      <button key={c} type="button" onClick={() => setEditColor(c)}
-                        style={{ ...colorDot, background: c, outline: editColor === c ? `2px solid ${c}` : 'none', outlineOffset: 2 }} />
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setEditColor(c)}
+                        style={{
+                          ...colorDot,
+                          background: c,
+                          outline: editColor === c ? `2px solid ${c}` : 'none',
+                          outlineOffset: 2
+                        }}
+                      />
                     ))}
                   </div>
                   <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
@@ -242,63 +291,264 @@ export default function Sidebar({ categories, onCategoryCreate, onCategoryUpdate
   )
 }
 
-const sidebar = {
-  width: 230, minWidth: 230,
-  background: 'var(--bg-secondary)',
-  borderRight: '1px solid var(--border)',
-  display: 'flex', flexDirection: 'column',
-  padding: '0 0 16px',
-  overflow: 'hidden',
-  transition: 'background 0.25s ease',
-}
+// Inline styles (keeping existing styles from original Sidebar)
 const logoRow = {
-  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
   padding: '16px 12px 14px',
   borderBottom: '1px solid var(--border)',
 }
-const logo = { display: 'flex', alignItems: 'center', gap: 8 }
-const logoText = { fontFamily: 'Montserrat, sans-serif', fontSize: 15, fontWeight: 800, letterSpacing: '-0.01em' }
+
+const logo = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8
+}
+
+const logoText = {
+  fontFamily: 'Montserrat, sans-serif',
+  fontSize: 15,
+  fontWeight: 800,
+  letterSpacing: '-0.01em'
+}
+
 const themeBtn = {
-  background: 'var(--bg-hover)', border: '1px solid var(--border)',
-  borderRadius: 8, width: 32, height: 32, fontSize: 16,
-  display: 'flex', alignItems: 'center', justifyContent: 'center',
-  cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0,
+  background: 'var(--bg-hover)',
+  border: '1px solid var(--border)',
+  borderRadius: 8,
+  width: 32,
+  height: 32,
+  fontSize: 16,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  transition: 'all 0.2s',
+  flexShrink: 0,
 }
-const nav = { display: 'flex', flexDirection: 'column', gap: 2, padding: '10px 8px' }
+
+const nav = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 2,
+  padding: '10px 8px'
+}
+
 const navItem = {
-  display: 'flex', alignItems: 'center', gap: 10,
-  padding: '9px 10px', borderRadius: 8,
-  background: 'none', color: 'var(--text-secondary)',
-  fontSize: 13, fontWeight: 500, textAlign: 'left',
-  transition: 'all 0.15s', cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 10,
+  padding: '9px 10px',
+  borderRadius: 8,
+  background: 'none',
+  color: 'var(--text-secondary)',
+  fontSize: 13,
+  fontWeight: 500,
+  textAlign: 'left',
+  transition: 'all 0.15s',
+  cursor: 'pointer',
 }
-const navItemActive = { background: 'var(--accent-dim)', color: 'var(--accent)', fontWeight: 600 }
-const divider = { height: 1, background: 'var(--border)', margin: '0 12px' }
-const section = { flex: 1, overflow: 'hidden', padding: '10px 8px', display: 'flex', flexDirection: 'column', minHeight: 0 }
-const sectionHeader = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 6px', marginBottom: 6 }
-const sectionTitle = { fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }
-const addBtn = { background: 'var(--bg-hover)', color: 'var(--text-secondary)', borderRadius: 6, width: 22, height: 22, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '1px solid var(--border)' }
-const catForm = { background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, padding: 10, marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 4 }
-const catEditForm = { background: 'var(--bg-card)', border: '1px solid var(--accent)', borderRadius: 8, padding: 10, marginBottom: 6, display: 'flex', flexDirection: 'column', gap: 4 }
-const catInput = { background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 10px', color: 'var(--text-primary)', fontSize: 12, width: '100%' }
-const pickerLabel = { fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 2 }
-const iconGrid = { display: 'flex', flexWrap: 'wrap', gap: 2 }
-const colorGrid = { display: 'flex', flexWrap: 'wrap', gap: 4 }
-const iconBtn = { background: 'none', borderRadius: 4, padding: 2, fontSize: 13, cursor: 'pointer', transition: 'all 0.1s' }
-const colorDot = { width: 14, height: 14, borderRadius: '50%', border: 'none', cursor: 'pointer', flexShrink: 0 }
-const saveCatBtn = { background: 'var(--accent)', color: '#fff', borderRadius: 6, padding: '5px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', marginLeft: 'auto' }
-const cancelBtn = { background: 'var(--bg-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: 6, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }
-const deleteBtn = { background: 'rgba(248,113,113,0.1)', color: '#f87171', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 6, padding: '5px 8px', fontSize: 12, cursor: 'pointer' }
-const catList = { display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', flex: 1 }
+
+const navItemActive = {
+  background: 'var(--accent-dim)',
+  color: 'var(--accent)',
+  fontWeight: 600
+}
+
+const divider = {
+  height: 1,
+  background: 'var(--border)',
+  margin: '0 12px'
+}
+
+const section = {
+  flex: 1,
+  overflow: 'hidden',
+  padding: '10px 8px',
+  display: 'flex',
+  flexDirection: 'column',
+  minHeight: 0
+}
+
+const sectionHeader = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '0 6px',
+  marginBottom: 6
+}
+
+const sectionTitle = {
+  fontSize: 11,
+  fontWeight: 700,
+  color: 'var(--text-muted)',
+  textTransform: 'uppercase',
+  letterSpacing: '0.06em'
+}
+
+const addBtn = {
+  background: 'var(--bg-hover)',
+  color: 'var(--text-secondary)',
+  borderRadius: 6,
+  width: 22,
+  height: 22,
+  fontSize: 15,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  border: '1px solid var(--border)'
+}
+
+const catForm = {
+  background: 'var(--bg-card)',
+  border: '1px solid var(--border)',
+  borderRadius: 8,
+  padding: 10,
+  marginBottom: 8,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 4
+}
+
+const catEditForm = {
+  background: 'var(--bg-card)',
+  border: '1px solid var(--accent)',
+  borderRadius: 8,
+  padding: 10,
+  marginBottom: 6,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 4
+}
+
+const catInput = {
+  background: 'var(--bg-secondary)',
+  border: '1px solid var(--border)',
+  borderRadius: 6,
+  padding: '6px 10px',
+  color: 'var(--text-primary)',
+  fontSize: 12,
+  width: '100%'
+}
+
+const pickerLabel = {
+  fontSize: 10,
+  fontWeight: 700,
+  color: 'var(--text-muted)',
+  textTransform: 'uppercase',
+  letterSpacing: '0.05em',
+  marginTop: 2
+}
+
+const iconGrid = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: 2
+}
+
+const colorGrid = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: 4
+}
+
+const iconBtn = {
+  background: 'none',
+  borderRadius: 4,
+  padding: 2,
+  fontSize: 13,
+  cursor: 'pointer',
+  transition: 'all 0.1s'
+}
+
+const colorDot = {
+  width: 14,
+  height: 14,
+  borderRadius: '50%',
+  border: 'none',
+  cursor: 'pointer',
+  flexShrink: 0
+}
+
+const saveCatBtn = {
+  background: 'var(--accent)',
+  color: '#fff',
+  borderRadius: 6,
+  padding: '5px 12px',
+  fontSize: 12,
+  fontWeight: 600,
+  cursor: 'pointer',
+  marginLeft: 'auto'
+}
+
+const cancelBtn = {
+  background: 'var(--bg-hover)',
+  color: 'var(--text-secondary)',
+  border: '1px solid var(--border)',
+  borderRadius: 6,
+  padding: '5px 10px',
+  fontSize: 12,
+  cursor: 'pointer'
+}
+
+const deleteBtn = {
+  background: 'rgba(248,113,113,0.1)',
+  color: '#f87171',
+  border: '1px solid rgba(248,113,113,0.3)',
+  borderRadius: 6,
+  padding: '5px 8px',
+  fontSize: 12,
+  cursor: 'pointer'
+}
+
+const catList = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 2,
+  overflowY: 'auto',
+  flex: 1
+}
+
 const catItem = {
-  display: 'flex', alignItems: 'center', gap: 8,
-  padding: '6px 8px', borderRadius: 6,
-  cursor: 'pointer', transition: 'background 0.15s',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+  padding: '6px 8px',
+  borderRadius: 6,
+  cursor: 'pointer',
+  transition: 'background 0.15s',
 }
-const catDot = { width: 8, height: 8, borderRadius: '50%', flexShrink: 0 }
-const editHint = { fontSize: 10, opacity: 0, transition: 'opacity 0.15s' }
+
+const catDot = {
+  width: 8,
+  height: 8,
+  borderRadius: '50%',
+  flexShrink: 0
+}
+
+const editHint = {
+  fontSize: 10,
+  opacity: 0,
+  transition: 'opacity 0.15s'
+}
+
 const userRow = {
-  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-  padding: '12px 12px 0', borderTop: '1px solid var(--border)', marginTop: 'auto',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '12px 12px 0',
+  borderTop: '1px solid var(--border)',
+  marginTop: 'auto',
 }
-const signOutBtn = { background: 'var(--bg-hover)', color: 'var(--text-muted)', borderRadius: 6, padding: '5px 8px', fontSize: 14, cursor: 'pointer', border: '1px solid var(--border)' }
+
+const signOutBtn = {
+  background: 'var(--bg-hover)',
+  color: 'var(--text-muted)',
+  borderRadius: 6,
+  padding: '5px 8px',
+  fontSize: 14,
+  cursor: 'pointer',
+  border: '1px solid var(--border)'
+}
